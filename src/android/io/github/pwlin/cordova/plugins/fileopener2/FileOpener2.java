@@ -60,11 +60,12 @@ public class FileOpener2 extends CordovaPlugin {
 		if (action.equals("open")) {
 			String fileUrl = args.getString(0);
 			String contentType = args.getString(1);
+			Boolean readOnly = args.getBoolean(2);
 			Boolean openWithDefault = true;
-			if(args.length() > 2){
-				openWithDefault = args.getBoolean(2);
+			if(args.length() > 3){
+				openWithDefault = args.getBoolean(3);
 			}
-			this._open(fileUrl, contentType, openWithDefault, callbackContext);
+			this._open(fileUrl, contentType, readOnly, openWithDefault, callbackContext);
 		}
 		else if (action.equals("uninstall")) {
 			this._uninstall(args.getString(0), callbackContext);
@@ -90,7 +91,7 @@ public class FileOpener2 extends CordovaPlugin {
 		return true;
 	}
 
-	private void _open(String fileArg, String contentType, Boolean openWithDefault, CallbackContext callbackContext) throws JSONException {
+	private void _open(String fileArg, String contentType, Boolean readOnly, Boolean openWithDefault, CallbackContext callbackContext) throws JSONException {
 		String fileName = "";
 		try {
 			CordovaResourceApi resourceApi = webView.getResourceApi();
@@ -121,7 +122,11 @@ public class FileOpener2 extends CordovaPlugin {
 					Context context = cordova.getActivity().getApplicationContext();
 					Uri path = FileProvider.getUriForFile(context, cordova.getActivity().getPackageName() + ".opener.provider", file);
 					intent.setDataAndType(path, contentType);
-					intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_ACTIVITY_NO_HISTORY);
+					intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+                                        if(!readOnly) {
+                                            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                        }
 
 				}
 
